@@ -10,7 +10,9 @@ export default async function HomePage() {
 
   if (session.role === 'ADMIN') {
     redirect('/admin');
-  } else {
+  } else if (session.role === 'SELLER') {
     redirect('/seller');
+  } else {
+    redirect('/buyer');
   }
 }

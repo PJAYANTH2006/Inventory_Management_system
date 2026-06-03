@@ -25,7 +25,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
     if (user.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/seller', request.url));
+      // Redirect to correct dashboard based on role
+      const redirectTarget = user.role === 'SELLER' ? '/seller' : '/buyer';
+      return NextResponse.redirect(new URL(redirectTarget, request.url));
     }
   }
 
@@ -36,8 +38,17 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set('from', path);
       return NextResponse.redirect(loginUrl);
     }
-    if (user.role === 'ADMIN') {
-      return NextResponse.redirect(new URL('/admin', request.url));
+    if (user.role !== 'SELLER' && user.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/buyer', request.url));
+    }
+  }
+
+  // Protect Buyer dashboard
+  if (path.startsWith('/buyer')) {
+    if (!user) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('from', path);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
@@ -46,8 +57,10 @@ export async function middleware(request: NextRequest) {
     if (user) {
       if (user.role === 'ADMIN') {
         return NextResponse.redirect(new URL('/admin', request.url));
-      } else {
+      } else if (user.role === 'SELLER') {
         return NextResponse.redirect(new URL('/seller', request.url));
+      } else {
+        return NextResponse.redirect(new URL('/buyer', request.url));
       }
     }
     if (path === '/') {

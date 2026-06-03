@@ -1,7 +1,16 @@
 const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not defined.');
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding database...');
@@ -15,6 +24,7 @@ async function main() {
   // Hash passwords
   const adminPasswordHash = await bcrypt.hash('admin123', 10);
   const sellerPasswordHash = await bcrypt.hash('seller123', 10);
+  const buyerPasswordHash = await bcrypt.hash('buyer123', 10);
 
   // Create Users
   const admin = await prisma.user.create({
@@ -35,7 +45,16 @@ async function main() {
     },
   });
 
-  console.log(`Created users: Admin (${admin.email}), Seller (${seller.email})`);
+  const buyer = await prisma.user.create({
+    data: {
+      email: 'buyer@aasamedchem.com',
+      name: 'Jane Buyer',
+      passwordHash: buyerPasswordHash,
+      role: 'BUYER',
+    },
+  });
+
+  console.log(`Created users: Admin (${admin.email}), Seller (${seller.email}), Buyer (${buyer.email})`);
 
   // Create Products
   const products = [
@@ -119,9 +138,11 @@ async function main() {
 main()
   .then(async () => {
     await prisma.$disconnect();
+    await pool.end();
   })
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
+    await pool.end();
     process.exit(1);
   });

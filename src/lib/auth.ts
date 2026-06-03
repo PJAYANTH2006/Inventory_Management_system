@@ -9,7 +9,7 @@ export interface UserSession {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'SELLER';
+  role: 'ADMIN' | 'SELLER' | 'BUYER';
 }
 
 /**

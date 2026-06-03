@@ -12,8 +12,8 @@ export async function PATCH(
   try {
     const session = await getSession();
 
-    if (!session || session.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    if (!session || (session.role !== 'ADMIN' && session.role !== 'SELLER')) {
+      return NextResponse.json({ error: 'Forbidden: Admin or Seller access required' }, { status: 403 });
     }
 
     const { id } = await params;
