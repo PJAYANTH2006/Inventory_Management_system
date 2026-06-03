@@ -1,0 +1,88 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  SELLER
+}
+
+enum Dimension {
+  WEIGHT
+  VOLUME
+  COUNT
+}
+
+enum Unit {
+  g
+  kg
+  mL
+  L
+  items
+}
+
+enum OrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(SELLER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Product {
+  id             String      @id @default(uuid())
+  name           String
+  sku            String      @unique
+  description    String?
+  category       String?
+  dimension      Dimension
+  // stock is stored in base unit: g for WEIGHT, mL for VOLUME, items for COUNT
+  stock          Decimal     @db.Decimal(28, 8)
+  price          Decimal     @db.Decimal(28, 8)
+  priceUnit      Unit
+  minStockAlert  Decimal     @default(0) @db.Decimal(28, 8)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  status     OrderStatus @default(PENDING)
+  totalPrice Decimal     @db.Decimal(28, 8)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  items      OrderItem[]
+}
+
+model OrderItem {
+  id                 String   @id @default(uuid())
+  orderId            String
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id])
+  orderedQuantity    Decimal  @db.Decimal(28, 8)
+  orderedUnit        Unit
+  baseQuantity       Decimal  @db.Decimal(28, 8) // quantity in base unit
+  priceAtOrder       Decimal  @db.Decimal(28, 8) // price rate at order time
+  priceUnitAtOrder   Unit
+  calculatedPrice    Decimal  @db.Decimal(28, 8) // total price for this item
+  createdAt          DateTime @default(now())
+}
