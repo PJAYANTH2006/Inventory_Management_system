@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, Mail, Activity } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('from') || '/';
@@ -52,90 +52,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card glass-panel">
-        <div className="logo-container">
-          <div className="logo-icon">A</div>
-          <div className="logo-text">AasaMedChem</div>
-        </div>
-
-        <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to manage inventory & orders</p>
-
-        {error && <div className="alert-error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              Email Address
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Mail
-                size={18}
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)',
-                }}
-              />
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@aasamedchem.com"
-                style={{ paddingLeft: '38px' }}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <div className="form-group" style={{ marginBottom: '30px' }}>
-            <label className="form-label" htmlFor="password">
-              Password
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Lock
-                size={18}
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)',
-                }}
-              />
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{ paddingLeft: '38px' }}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: '24px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <p>Demo Accounts:</p>
-          <p style={{ marginTop: '4px' }}>
-            Admin: <span style={{ color: 'var(--text-secondary)' }}>admin@aasamedchem.com</span> (admin123)
-          </p>
-          <p>
-            Seller: <span style={{ color: 'var(--text-secondary)' }}>seller@aasamedchem.com</span> (seller123)
-          </p>
-        </div>
+    <div className="auth-card glass-panel">
+      <div className="logo-container" style={{ marginBottom: '30px' }}>
+        <div className="logo-icon">A</div>
+        <div className="logo-text">AasaMedChem</div>
       </div>
+
+      <h1 className="auth-title">Welcome Back</h1>
+      <p className="auth-subtitle">Sign in to manage inventory & orders</p>
+
+      {error && <div className="alert-error">{error}</div>}
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label className="form-label" htmlFor="email">
+            Email Address
+          </label>
+          <div style={{ position: 'relative' }}>
+            <Mail
+              size={18}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+            />
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@aasamedchem.com"
+              style={{ paddingLeft: '38px' }}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="form-group" style={{ marginBottom: '30px' }}>
+          <label className="form-label" htmlFor="password">
+            Password
+          </label>
+          <div style={{ position: 'relative' }}>
+            <Lock
+              size={18}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+            />
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ paddingLeft: '38px' }}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign In'}
+        </button>
+      </form>
+
+      <div style={{ marginTop: '24px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        <p>Demo Accounts:</p>
+        <p style={{ marginTop: '4px' }}>
+          Admin: <span style={{ color: 'var(--text-secondary)' }}>admin@aasamedchem.com</span> (admin123)
+        </p>
+        <p>
+          Seller: <span style={{ color: 'var(--text-secondary)' }}>seller@aasamedchem.com</span> (seller123)
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="auth-container">
+      <Suspense fallback={
+        <div className="auth-card glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>Loading Login Portal...</p>
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }

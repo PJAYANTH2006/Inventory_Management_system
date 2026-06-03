@@ -292,7 +292,7 @@ export default function SellerDashboard() {
             zIndex: 2000,
             padding: '16px 24px',
             display: 'flex',
-            align-items: 'center',
+            alignItems: 'center',
             gap: '12px',
             borderLeft: `4px solid ${notification.type === 'success' ? 'var(--success)' : 'var(--error)'}`,
             backgroundColor: 'rgba(21, 28, 44, 0.95)',
